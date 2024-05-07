@@ -45,7 +45,7 @@ def transcribe_audio(session_id):
     except Exception as e:
         app.logger.error(e)
         error_audio_path = os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + "try_again.mp3"
-        return jsonify({'response_url': error_audio_path, 'status': "Failed"}), 500
+        return jsonify({'response_url': error_audio_path, 'status': "Failed"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
