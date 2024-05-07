@@ -1,5 +1,8 @@
 import json
 from PROMPTS import get_confirmation_prompt, get_prompt
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_ai_response(user_input, client, prompt_type):
     system_prompt = get_prompt(prompt_type)
@@ -23,7 +26,7 @@ def get_ai_response(user_input, client, prompt_type):
     )
 
     content = json.loads(response.choices[0].message.content)
-    print(f"User Input: {user_input}\n Content: {content}")
+    logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
@@ -48,7 +51,7 @@ def get_confirmation(user_input, action, user_input_history, client):
     )
 
     content = json.loads(response.choices[0].message.content)
-    print(f"User Input: {user_input}\n Content: {content}")
+    logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
