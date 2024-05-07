@@ -27,20 +27,25 @@ def home():
 
 @app.route('/chat/<session_id>', methods=['POST'])
 def transcribe_audio(session_id):
-    # Check if the post request has the file part
-    if 'audiofile' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    file = request.files['audiofile']
-    print(file)
+    try:
+        # Check if the post request has the file part
+        if 'audiofile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        file = request.files['audiofile']
+        print(file)
 
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
 
-    user_input = speech_to_text(file, client)
-    response = chat(session_id, user_input, collection, client)
-    speech = text_to_speech(response["response"], client)
-    return jsonify({'response_url': speech, 'status': response["status"]}), 200
-    
+        user_input = speech_to_text(file, client)
+        print(user_input)
+        response = chat(session_id, user_input, collection, client)
+        speech = text_to_speech(response["response"], client)
+        return jsonify({'response_url': speech, 'status': response["status"]}), 200
+    except Exception as e:
+        print(e)
+        error_audio_path = os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + "try_again.mp3"
+        return jsonify({'response_url': error_audio_path, 'status': "Failed"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
