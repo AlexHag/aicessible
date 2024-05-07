@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import os
 from openai import OpenAI
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
@@ -10,6 +11,13 @@ print(api_key)
 
 # Initialize the OpenAI client with the API key
 client = OpenAI()
+
+client = MongoClient(os.getenv('MONGODB_URI', 'mongodb+srv://bharatnadkarni:OWzhc3LC1KnYjzX6@cluster0.x5gwek4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'))
+print(client)
+db = client['accessible']
+
+collection = db.actions
+
 
 @app.route('/')
 def home():
