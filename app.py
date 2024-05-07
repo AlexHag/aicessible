@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request
 import os
 from openai import OpenAI
 from pymongo import MongoClient
+from speech import speech_to_text, text_to_speech
 
-app = Flask(__name__)
+app = Flask(__name__,  static_folder='speech', static_url_path='/speech')
 
 # Get the API key from environment variables
 api_key = os.getenv('OPENAI_API_KEY')
@@ -12,9 +13,9 @@ print(api_key)
 # Initialize the OpenAI client with the API key
 client = OpenAI()
 
-client = MongoClient(os.getenv('MONGODB_URI', 'mongodb+srv://bharatnadkarni:OWzhc3LC1KnYjzX6@cluster0.x5gwek4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'))
-print(client)
-db = client['accessible']
+mongo_client = MongoClient(os.getenv('MONGODB_URI', 'mongodb+srv://bharatnadkarni:OWzhc3LC1KnYjzX6@cluster0.x5gwek4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'))
+print(mongo_client)
+db = mongo_client['accessible']
 
 collection = db.actions
 
@@ -33,24 +34,12 @@ def transcribe_audio():
     
     # If the user does not select a file, the browser submits an
     # empty file without a filename.
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    if file:
-        # You might want to add a file check here for security (file type, size)
-        
-        # Perform the transcription using OpenAI's Whisper model
-        try:
-            # Use the file stream directly rather than saving and reopening
-            file_bytes = file.read()
 
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=(file.filename, file_bytes, file.content_type)
-            )
-            return jsonify({'transcription': transcription.text}), 200
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+    response = speech_to_text(file, client)
+    print(response)
+    speech = text_to_speech(response, client)
+    return speech
+    
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
