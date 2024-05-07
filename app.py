@@ -4,6 +4,7 @@ from openai import OpenAI
 from pymongo import MongoClient
 from speech import speech_to_text, text_to_speech
 from aicessible_api import chat
+import logging
 
 app = Flask(__name__,  static_folder='speech', static_url_path='/speech')
 
@@ -25,7 +26,7 @@ collection = db.actions
 def home():
     return jsonify({'message': 'Welcome to the Aiccesible API'})
 
-@app.route('/chat/<session_id>', methods=['POST'])
+@app.route('/audio-chat/<session_id>', methods=['POST'])
 def transcribe_audio(session_id):
     try:
         # Check if the post request has the file part
@@ -42,6 +43,19 @@ def transcribe_audio(session_id):
         response = chat(session_id, user_input, collection, client)
         speech = text_to_speech(response["response"], client)
         return jsonify({'response_url': speech, 'status': response["status"]}), 200
+    except Exception as e:
+        print(e)
+        error_audio_path = os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + "try_again.mp3"
+        return jsonify({'response_url': error_audio_path, 'status': "Failed"}), 500
+
+@app.route('/chat/<session_id>', methods=['POST'])
+def chat_text(session_id):
+    try:
+        data = request.get_json()
+        user_input = data["user_input"]
+        response = chat(session_id, user_input, collection, client)
+        return jsonify({'response': response["response"], 'status': response["status"]}), 200
+    
     except Exception as e:
         print(e)
         error_audio_path = os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + "try_again.mp3"
