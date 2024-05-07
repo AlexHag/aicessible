@@ -18,7 +18,7 @@ I want you to give me a JSON response. This JSON response should contain, two st
 Given the input of the user I want you to identify the action as one of these options: "MPay", "Remittance" or "Calling".
 If none of these options can be identified from the input of the user I want set the action to "Unknown" and set the "response" property to something concise that will explain to the user that you were unable to identify what the user would like to do.
 If it is unclear which transaction type the user want to perform, whether its an MPay transaction or a remittance transaction,
-I want you to set the action to "transaction" and then set the "response" property to something that explains to the user that they can either send a transaction with MPay or with Remittance and then ask them which type of transaction they would like to make.
+I want you to set the action to "Transaction" and then set the "response" property to something that explains to the user that they can either send a transaction with MPay or with Remittance and then ask them which type of transaction they would like to make.
 """
 
 MPAY_PROMPT="""
@@ -30,7 +30,10 @@ I would like you to give me a JSON response that look like this
     "response" ""
 }
 Does the input of the user contain the phone number of the recipient and the amount they would like to send?
-If the user has given enough information to send an MPay transaction set the status to "accepted", and then set the response to include the action the user wants to perform and the details of the transaction and ask the user if they want to confirm the transaction.
-If you the user has not given enough information set the status to "needDetails" and set the "response" to tell the user they need to give you the information you are missing.
-If you are unknown what the user is saying, set the status to "unknown" and set the "response" to something that tells the user that you are unknown to process their request.
+If the user has given enough information to send an MPay transaction set the status to "Accepted", and then set the response to include the action the user wants to perform and the details of the transaction and ask the user if they want to confirm the transaction.
+If you the user has not given enough information set the status to "NeedDetails" and set the "response" to tell the user they need to give you the information you are missing.
+If you are unknown what the user is saying, set the status to "Unknown" and set the "response" to something that tells the user that you are unknown to process their request.
 """
+
+# action: MPay, Remittance, Calling, Transaction, Unknown
+# status: Unknown, NeedDetails, Accepted

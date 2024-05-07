@@ -3,6 +3,7 @@ import os
 from openai import OpenAI
 from pymongo import MongoClient
 from speech import speech_to_text, text_to_speech
+from aicessible_api import chat
 
 app = Flask(__name__,  static_folder='speech', static_url_path='/speech')
 
@@ -24,21 +25,21 @@ collection = db.actions
 def home():
     return jsonify({'message': 'Welcome to the Aiccesible API'})
 
-@app.route('/speech-to-text', methods=['POST'])
-def transcribe_audio():
+@app.route('/chat/<session_id>', methods=['POST'])
+def transcribe_audio(session_id):
     # Check if the post request has the file part
     if 'audiofile' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['audiofile']
     print(file)
-    
+
     # If the user does not select a file, the browser submits an
     # empty file without a filename.
 
-    response = speech_to_text(file, client)
-    print(response)
-    speech = text_to_speech(response, client)
-    return speech
+    user_input = speech_to_text(file, client)
+    response = chat(session_id, user_input, collection, client)
+    speech = text_to_speech(response["response"], client)
+    return jsonify({'response_url': speech, 'status': response["status"]}), 200
     
 
 if __name__ == '__main__':

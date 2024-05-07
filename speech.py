@@ -33,7 +33,7 @@ def text_to_speech(text, client):
         input=text
     )
     speech.stream_to_file(full_path)
-    return jsonify({'speech': os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + f"{current_time_seconds}.mp3"})
+    return os.getenv('BASE_URL', 'http://127.0.0.1:5000') + "/speech/" + f"{current_time_seconds}.mp3"
 
 
 
