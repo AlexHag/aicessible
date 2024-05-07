@@ -1,21 +1,19 @@
-import sys
-import os
-from openai import OpenAI
 import json
-from PROMPTS import GET_ACTION_PROMPT, MPAY_PROMPT, get_confirmation_prompt
-from pymongo import MongoClient
+from PROMPTS import CONFIRMATION_PROMPT, get_prompt
 import logging
 
 logger = logging.getLogger(__name__)
 
-def get_action(user_input, client):
+def get_ai_response(user_input, client, prompt_type = ""):
+    system_prompt = get_prompt(prompt_type)
+
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4-turbo-preview",
         response_format={ "type": "json_object" },
         messages=[
             {
                 "role": "system",
-                "content": GET_ACTION_PROMPT
+                "content": system_prompt
             },
             {
                 "role": "user",
@@ -23,43 +21,20 @@ def get_action(user_input, client):
             }
         ],
         temperature=0.7,
-        max_tokens=64,
+        # max_tokens=64,
         top_p=1
     )
-
+    print(response)
     content = json.loads(response.choices[0].message.content)
-    logger.info(f"User Input: {user_input}\n Content: {content}")
-
-    return content
-
-def mpay_action(user_input, client):
-    response = client.chat.completions.create(
-        model="gpt-4-turbo",
-        response_format={ "type": "json_object" },
-        messages=[
-            {
-                "role": "system",
-                "content": MPAY_PROMPT
-            },
-            {
-                "role": "user",
-                "content": user_input
-            }
-        ],
-        temperature=0.7,
-        max_tokens=64,
-        top_p=1,
-    )
-
-    content = json.loads(response.choices[0].message.content)
+    print(f"User Input: {user_input}\nContent: {content}")
     logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
 def get_confirmation(user_input, action, user_input_history, client):
-    system_prompt = get_confirmation_prompt(action, user_input)
+    system_prompt = CONFIRMATION_PROMPT(action)
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4-turbo-preview",
         response_format={ "type": "json_object" },
         messages=[
             {
@@ -69,14 +44,20 @@ def get_confirmation(user_input, action, user_input_history, client):
             {
                 "role": "user",
                 "content": user_input_history
+            },
+            {
+                "role": "user",
+                "content": user_input
             }
         ],
         temperature=0.7,
-        max_tokens=64,
+        # max_tokens=64,
         top_p=1,
     )
 
+    print(response)
     content = json.loads(response.choices[0].message.content)
+    print(f"User Input: {user_input}\nContent: {content}")
     logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
@@ -89,7 +70,7 @@ def chat(session_id, user_input, collection, client):
     full_user_input = ""
 
     if document is None:
-        action_response = get_action(user_input, client)
+        action_response = get_ai_response(user_input, client, "GET_ACTION_PROMPT")
         document = {
                 "sessionId": session_id,
                 "action": action_response["action"],
@@ -116,19 +97,23 @@ def chat(session_id, user_input, collection, client):
     ai_response = None
 
     if action == "MPay":
-        ai_response = mpay_action(full_user_input, client)
+        ai_response = get_ai_response(full_user_input, client, "MPay")
+    
     elif action == "Remittance":
-        ai_response = {"response": "Remittance is not supported yet", "status": "Failed"}
+        ai_response = get_ai_response(full_user_input, client, "Remittance")
+    
     elif action == "Calling":
         ai_response = {"response": "Calling is not supported yet", "status": "Failed"}
-    elif action == "Transaction":
-        ai_response = get_action(full_user_input, client)
-        ai_response["status"] = "NeedDetails"
-    elif action == "Unknown":
-        ai_response = get_action(full_user_input, client)
+    
+    elif action == "Transaction": # Remove and handle as Unknown or create a specific action prompt for transactions. 
+        ai_response = get_ai_response(full_user_input, client, "GET_ACTION_PROMPT")
         ai_response["status"] = "NeedDetails"
     
-    update = {'$set': {'userInput': full_user_input, 'status': ai_response["status"]}}
+    elif action == "Unknown":
+        ai_response = get_ai_response(full_user_input, client, "GET_ACTION_PROMPT")
+        ai_response["status"] = "NeedDetails"
+    
+    update = {'$set': {'userInput': full_user_input, 'status': ai_response["status"]}} #, 'data': ai_response["data"]}}
     result = collection.update_one(query, update)
 
     return ai_response
