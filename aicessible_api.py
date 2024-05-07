@@ -4,6 +4,9 @@ from openai import OpenAI
 import json
 from PROMPTS import GET_ACTION_PROMPT, MPAY_PROMPT, get_confirmation_prompt
 from pymongo import MongoClient
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_action(user_input, client):
     response = client.chat.completions.create(
@@ -25,7 +28,7 @@ def get_action(user_input, client):
     )
 
     content = json.loads(response.choices[0].message.content)
-    print(f"User Input: {user_input}\n Content: {content}")
+    logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
@@ -49,7 +52,7 @@ def mpay_action(user_input, client):
     )
 
     content = json.loads(response.choices[0].message.content)
-    print(f"User Input: {user_input}\n Content: {content}")
+    logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
@@ -74,7 +77,7 @@ def get_confirmation(user_input, action, user_input_history, client):
     )
 
     content = json.loads(response.choices[0].message.content)
-    print(f"User Input: {user_input}\n Content: {content}")
+    logger.info(f"User Input: {user_input}\n Content: {content}")
 
     return content
 
