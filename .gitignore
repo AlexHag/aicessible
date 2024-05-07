@@ -4,3 +4,5 @@ speech/*
 # But do not ignore the folder itself, force include a .gitkeep
 !speech/.gitkeep
 !speech/try_again.mp3
+
+__pycache__
