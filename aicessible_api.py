@@ -82,6 +82,7 @@ def chat(session_id, user_input, collection, client):
         full_user_input = user_input
 
         if action == "Transaction" or action == "Unknown":
+            action_response["status"] = "NeedDetails"
             return action_response
 
     else:
