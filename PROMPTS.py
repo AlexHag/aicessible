@@ -17,9 +17,12 @@ These are the actions a user can perform
 4. Add money to their majority account
 I want you to given me a JSON response an action property like this
 {
-    "action": ""
+    "action": "",
+    "response": ""
 }
-Where the action can have the values "MPay", "Remittance", "Calling", "AddMoney" or "Unknown"
+Where the action can have the values "MPay", "Remittance", "Calling", "AddMoney" or "Unknown".
+If the action is "Unknown" I would like you to set the response property to something describing why
+you were unable to understand the user's request.
 """
 
 MPAY_PROMPT = """
