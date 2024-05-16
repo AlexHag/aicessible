@@ -20,7 +20,7 @@ def get_ai_response(user_input, client, prompt_type = ""):
                 "content": user_input
             }
         ],
-        temperature=0.7,
+        temperature=1.1,
         # max_tokens=64,
         top_p=1
     )
